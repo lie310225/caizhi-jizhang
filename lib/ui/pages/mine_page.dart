@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'articles_home_page.dart';
+import 'export_page.dart';
 
-/// 我的：知识模块 v2 占位
+/// 我的：v2 两个真实入口
 class MinePage extends StatelessWidget {
   const MinePage({super.key});
 
@@ -9,12 +11,28 @@ class MinePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('我的')),
       body: ListView(
-        children: const [
+        children: [
           ListTile(
-            leading: Icon(Icons.school_outlined),
-            title: Text('财务知识课堂'),
-            subtitle: Text('场景化财务知识学习（v2 即将上线）'),
-            trailing: Icon(Icons.chevron_right),
+            leading: const Icon(Icons.school_outlined),
+            title: const Text('财务知识课堂'),
+            subtitle: const Text('场景化财务知识学习'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ArticlesHomePage())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.cloud_download_outlined),
+            title: const Text('导出数据'),
+            subtitle: const Text('CSV 格式，系统分享'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ExportPage())),
+          ),
+          const Divider(height: 8),
+          const ListTile(
+            leading: Icon(Icons.settings_outlined),
+            title: Text('设置'),
+            subtitle: Text('v2 基础功能已上线'),
             enabled: false,
           ),
         ],
