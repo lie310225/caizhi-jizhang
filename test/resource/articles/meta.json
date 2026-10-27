@@ -1,0 +1,32 @@
+[
+  {
+    "id": "d01",
+    "title": "测试文章",
+    "category": "daily",
+    "relatedCategories": ["餐饮"],
+    "relatedFlows": ["operating"],
+    "summary": "测试用",
+    "readMinutes": 3,
+    "file": "d01_test.md"
+  },
+  {
+    "id": "i01",
+    "title": "另一篇",
+    "category": "investing",
+    "relatedCategories": ["理财", "还贷还借款"],
+    "relatedFlows": ["investing"],
+    "summary": "投资类",
+    "readMinutes": 4,
+    "file": "i01_test.md"
+  },
+  {
+    "id": "f01",
+    "title": "债务类",
+    "category": "debt",
+    "relatedCategories": ["还贷还借款"],
+    "relatedFlows": ["financing"],
+    "summary": "债务类",
+    "readMinutes": 5,
+    "file": "f01_test.md"
+  }
+]
