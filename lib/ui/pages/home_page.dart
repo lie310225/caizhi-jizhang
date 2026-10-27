@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../../config/categories.dart';
 import '../../models/transaction_record.dart';
 import '../../providers/finance_provider.dart';
+import '../../services/article_service.dart';
 import '../../services/format.dart';
 import 'add_transaction_sheet.dart';
+import 'article_detail_page.dart';
 
 /// 流水首页：月份切换 + 收支汇总卡 + 按日分组流水 + 记一笔
 class HomePage extends StatelessWidget {
@@ -187,6 +189,7 @@ class _TransactionTile extends StatelessWidget {
         child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
       ),
       child: ListTile(
+        onLongPress: () => _longPressAssociation(context),
         leading: CircleAvatar(
           backgroundColor: scheme.primaryContainer,
           child: Icon(
@@ -228,5 +231,18 @@ class _TransactionTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _longPressAssociation(BuildContext ctx) async {
+    final metaList = await ArticleService.loadMeta();
+    final match = ArticleService.findByCategory(metaList, record.category);
+    if (!ctx.mounted) return;
+    if (match == null) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text('「${record.category}」暂无关联知识')));
+      return;
+    }
+    Navigator.of(ctx).push(
+      MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
   }
 }

@@ -2,8 +2,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/finance_provider.dart';
+import '../../services/article_service.dart';
 import '../../services/format.dart';
 import '../../services/statements.dart';
+import 'article_detail_page.dart';
 
 /// 报表页：利润表 / 现金流量表 两个 Tab
 class ReportsPage extends StatelessWidget {
@@ -219,12 +221,14 @@ class _StatementRow extends StatelessWidget {
   final double? value;
   final String? valueText;
   final Color color;
+  final Widget? trailing;
 
   const _StatementRow({
     required this.label,
     this.value,
     this.valueText,
     required this.color,
+    this.trailing,
   });
 
   @override
@@ -241,6 +245,7 @@ class _StatementRow extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (trailing != null) ...[trailing!],
         ],
       ),
     );
@@ -289,16 +294,37 @@ class _CashFlowView extends StatelessWidget {
                   label: '经营活动净额（日常收支）',
                   value: cash.operating,
                   color: cash.operating >= 0 ? scheme.primary : scheme.error,
+                  trailing: IconButton(
+                    iconSize: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () => _openFlowArticle(context, 'operating'),
+                  ),
                 ),
                 _StatementRow(
                   label: '投资活动净额（买卖理财）',
                   value: cash.investing,
                   color: cash.investing >= 0 ? scheme.primary : scheme.error,
+                  trailing: IconButton(
+                    iconSize: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () => _openFlowArticle(context, 'investing'),
+                  ),
                 ),
                 _StatementRow(
                   label: '筹资活动净额（借入偿还）',
                   value: cash.financing,
                   color: cash.financing >= 0 ? scheme.primary : scheme.error,
+                  trailing: IconButton(
+                    iconSize: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () => _openFlowArticle(context, 'financing'),
+                  ),
                 ),
                 const Divider(height: 24),
                 _StatementRow(
@@ -381,5 +407,18 @@ class _CashFlowView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _openFlowArticle(BuildContext ctx, String flow) async {
+    final metaList = await ArticleService.loadMeta();
+    final match = ArticleService.findByFlow(metaList, flow);
+    if (!ctx.mounted) return;
+    if (match == null) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(content: Text('暂无该区块的入门文章')));
+      return;
+    }
+    Navigator.of(ctx).push(
+      MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
   }
 }
