@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 // 现金流三分法类型
 enum FlowType { operating, investing, financing }
 
@@ -40,3 +42,20 @@ FlowType flowFor(String category, TxType type) {
   }
   return FlowType.operating;
 }
+
+/// 分类 → 图标（UI 展示用，未知分类回退 Icons.receipt_long_outlined）
+const Map<String, IconData> kCategoryIcons = {
+  '餐饮': Icons.restaurant_outlined,
+  '交通': Icons.directions_bus_outlined,
+  '购物': Icons.shopping_bag_outlined,
+  '居住': Icons.home_outlined,
+  '娱乐': Icons.sports_esports_outlined,
+  '医疗': Icons.local_hospital_outlined,
+  '理财': Icons.savings_outlined,
+  '还贷还借款': Icons.credit_score_outlined,
+  '工资': Icons.work_outline,
+  '奖金': Icons.emoji_events_outlined,
+  '理财收益': Icons.trending_up_outlined,
+  '借入款': Icons.handshake_outlined,
+  '其他': Icons.more_horiz,
+};
