@@ -17,18 +17,18 @@ class BalanceItem {
   bool get isAsset => kind == 'asset';
 
   Map<String, Object?> toMap() => {
-        'id': id,
-        'kind': kind,
-        'name': name,
-        'amount': amount,
-        'updated_at': updatedAt,
-      };
+    'id': id,
+    'kind': kind,
+    'name': name,
+    'amount': amount,
+    'updated_at': updatedAt,
+  };
 
   factory BalanceItem.fromMap(Map<String, Object?> map) => BalanceItem(
-        id: map['id'] as int?,
-        kind: map['kind'] as String,
-        name: map['name'] as String,
-        amount: (map['amount'] as num).toDouble(),
-        updatedAt: (map['updated_at'] as String?) ?? '',
-      );
+    id: map['id'] as int?,
+    kind: map['kind'] as String,
+    name: map['name'] as String,
+    amount: (map['amount'] as num).toDouble(),
+    updatedAt: (map['updated_at'] as String?) ?? '',
+  );
 }
