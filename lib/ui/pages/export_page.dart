@@ -72,8 +72,9 @@ class _ExportPageState extends State<ExportPage> {
       String? yearPrefix = _yearPrefix;
       if (_range == _RangeOption.sixMonths) {
         monthPrefix = shiftMonth(
-            '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}',
-            -5);
+          '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}',
+          -5,
+        );
       }
       final path = await provider.exportCsvZip(
         monthPrefix: monthPrefix,
@@ -81,13 +82,15 @@ class _ExportPageState extends State<ExportPage> {
       );
       await Share.shareXFiles([XFile(path)]);
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('导出完成')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('导出完成')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('导出失败：$e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('导出失败：$e')));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -112,43 +115,52 @@ class _ExportPageState extends State<ExportPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('时间范围',
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text('时间范围', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       ChoiceChip(
-                          label: const Text('全部'),
-                          selected: _range == _RangeOption.all,
-                          onSelected: (_) => setState(() => _range = _RangeOption.all)),
+                        label: const Text('全部'),
+                        selected: _range == _RangeOption.all,
+                        onSelected: (_) =>
+                            setState(() => _range = _RangeOption.all),
+                      ),
                       ChoiceChip(
-                          label: const Text('去年'),
-                          selected: _range == _RangeOption.yearLast,
-                          onSelected: (_) => setState(() => _range = _RangeOption.yearLast)),
+                        label: const Text('去年'),
+                        selected: _range == _RangeOption.yearLast,
+                        onSelected: (_) =>
+                            setState(() => _range = _RangeOption.yearLast),
+                      ),
                       ChoiceChip(
-                          label: const Text('今年'),
-                          selected: _range == _RangeOption.yearThis,
-                          onSelected: (_) => setState(() => _range = _RangeOption.yearThis)),
+                        label: const Text('今年'),
+                        selected: _range == _RangeOption.yearThis,
+                        onSelected: (_) =>
+                            setState(() => _range = _RangeOption.yearThis),
+                      ),
                       ChoiceChip(
-                          label: const Text('近 6 个月'),
-                          selected: _range == _RangeOption.sixMonths,
-                          onSelected: (_) => setState(() => _range = _RangeOption.sixMonths)),
+                        label: const Text('近 6 个月'),
+                        selected: _range == _RangeOption.sixMonths,
+                        onSelected: (_) =>
+                            setState(() => _range = _RangeOption.sixMonths),
+                      ),
                       ChoiceChip(
-                          label: Text(_range == _RangeOption.custom
-                              ? '自定义 ✓'
-                              : '自定义...'),
-                          selected: _range == _RangeOption.custom,
-                          onSelected: (_) => _pickCustom()),
+                        label: Text(
+                          _range == _RangeOption.custom ? '自定义 ✓' : '自定义...',
+                        ),
+                        selected: _range == _RangeOption.custom,
+                        onSelected: (_) => _pickCustom(),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text('当前选择：$_label',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: scheme.onSurfaceVariant)),
+                  Text(
+                    '当前选择：$_label',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -159,40 +171,48 @@ class _ExportPageState extends State<ExportPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Row(children: [
-                    const Expanded(child: Text('transactions.csv（过滤后）')),
-                    Text('$filtered 条'),
-                  ]),
-                  Row(children: [
-                    const Expanded(child: Text('balance_items.csv（全量）')),
-                    Text('${provider.balanceItems.length} 条'),
-                  ]),
-                  Row(children: [
-                    const Expanded(child: Text('打包格式')),
-                    Text('zip（UTF-8 BOM CSV）'),
-                  ]),
+                  Row(
+                    children: [
+                      const Expanded(child: Text('transactions.csv（过滤后）')),
+                      Text('$filtered 条'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Expanded(child: Text('balance_items.csv（全量）')),
+                      Text('${provider.balanceItems.length} 条'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Expanded(child: Text('打包格式')),
+                      Text('zip（UTF-8 BOM CSV）'),
+                    ],
+                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
           FilledButton.tonal(
-              onPressed: _busy ? null : _doExport,
-              child: _busy
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('导出并分享')),
+            onPressed: _busy ? null : _doExport,
+            child: _busy
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('导出并分享'),
+          ),
           const SizedBox(height: 8),
           Text(
-              _range == _RangeOption.all && total == 0
-                  ? '⚠️ 没有交易记录，导出的 zip 只有空表头 CSV'
-                  : '导出后将打开系统分享面板（微信/邮件/网盘/保存到手机）',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant)),
+            _range == _RangeOption.all && total == 0
+                ? '⚠️ 没有交易记录，导出的 zip 只有空表头 CSV'
+                : '导出后将打开系统分享面板（微信/邮件/网盘/保存到手机）',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
         ],
       ),
     );
@@ -206,8 +226,9 @@ class _ExportPageState extends State<ExportPage> {
     }
     if (_range == _RangeOption.sixMonths) {
       final start = shiftMonth(
-          '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}',
-          -5);
+        '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}',
+        -5,
+      );
       return p.records.where((r) => r.date.compareTo('$start-01') >= 0).length;
     }
     if (_range == _RangeOption.custom && _customRange != null) {

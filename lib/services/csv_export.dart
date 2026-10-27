@@ -20,16 +20,18 @@ String _balanceHeader() => 'id,kind,name,amount,updated_at';
 List<int> transactionsToCsv(List<TransactionRecord> records) {
   final buf = StringBuffer('${_transactionsHeader()}\n');
   for (final r in records) {
-    buf.writeln([
-      r.id ?? '',
-      r.type.name,
-      _escapeCsvField(r.category),
-      r.amount.toString(),
-      r.flow.name,
-      _escapeCsvField(r.date),
-      _escapeCsvField(r.note),
-      _escapeCsvField(r.createdAt),
-    ].join(','));
+    buf.writeln(
+      [
+        r.id ?? '',
+        r.type.name,
+        _escapeCsvField(r.category),
+        r.amount.toString(),
+        r.flow.name,
+        _escapeCsvField(r.date),
+        _escapeCsvField(r.note),
+        _escapeCsvField(r.createdAt),
+      ].join(','),
+    );
   }
   return [..._bom, ...utf8.encode(buf.toString())];
 }
@@ -37,19 +39,23 @@ List<int> transactionsToCsv(List<TransactionRecord> records) {
 List<int> balanceItemsToCsv(List<BalanceItem> items) {
   final buf = StringBuffer('${_balanceHeader()}\n');
   for (final b in items) {
-    buf.writeln([
-      b.id ?? '',
-      _escapeCsvField(b.kind),
-      _escapeCsvField(b.name),
-      b.amount.toString(),
-      _escapeCsvField(b.updatedAt),
-    ].join(','));
+    buf.writeln(
+      [
+        b.id ?? '',
+        _escapeCsvField(b.kind),
+        _escapeCsvField(b.name),
+        b.amount.toString(),
+        _escapeCsvField(b.updatedAt),
+      ].join(','),
+    );
   }
   return [..._bom, ...utf8.encode(buf.toString())];
 }
 
 Future<List<int>> csvZipData(
-    List<TransactionRecord> records, List<BalanceItem> items) async {
+  List<TransactionRecord> records,
+  List<BalanceItem> items,
+) async {
   final txCsv = transactionsToCsv(records);
   final baCsv = balanceItemsToCsv(items);
   final a = Archive()

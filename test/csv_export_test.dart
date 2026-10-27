@@ -18,7 +18,12 @@ void main() {
     createdAt: '2026-10-27T12:00:00',
   );
   final b = const BalanceItem(
-    id: 1, kind: 'asset', name: '活期存款', amount: 12000, updatedAt: '2026-10-27T09:00:00');
+    id: 1,
+    kind: 'asset',
+    name: '活期存款',
+    amount: 12000,
+    updatedAt: '2026-10-27T09:00:00',
+  );
 
   test('transactions CSV 包含 UTF-8 BOM', () {
     final csv = transactionsToCsv([r]);

@@ -8,7 +8,9 @@ class ArticleService {
   static Future<List<ArticleMeta>> loadMeta() async {
     final raw = await rootBundle.loadString('assets/articles/meta.json');
     final list = jsonDecode(raw) as List;
-    return list.map((e) => ArticleMeta.fromMap(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => ArticleMeta.fromMap(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// 生产环境默认：从 Flutter asset 读取 Markdown 正文
@@ -38,7 +40,9 @@ class ArticleService {
   }
 
   /// 按 category 分组（首页用）
-  static Map<String, List<ArticleMeta>> groupByCategory(List<ArticleMeta> meta) {
+  static Map<String, List<ArticleMeta>> groupByCategory(
+    List<ArticleMeta> meta,
+  ) {
     final groups = <String, List<ArticleMeta>>{};
     for (final m in meta) {
       groups.putIfAbsent(m.category, () => []).add(m);

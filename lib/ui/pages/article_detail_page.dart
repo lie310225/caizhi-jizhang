@@ -36,9 +36,11 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.meta.title)),
       body: _content == null
-          ? Center(child: _error != null
-              ? Text('加载失败：$_error')
-              : const CircularProgressIndicator())
+          ? Center(
+              child: _error != null
+                  ? Text('加载失败：$_error')
+                  : const CircularProgressIndicator(),
+            )
           : MarkdownWidget(data: _content!),
     );
   }

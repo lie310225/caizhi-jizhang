@@ -238,11 +238,13 @@ class _TransactionTile extends StatelessWidget {
     final match = ArticleService.findByCategory(metaList, record.category);
     if (!ctx.mounted) return;
     if (match == null) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text('「${record.category}」暂无关联知识')));
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(SnackBar(content: Text('「${record.category}」暂无关联知识')));
       return;
     }
-    Navigator.of(ctx).push(
-      MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
+    Navigator.of(
+      ctx,
+    ).push(MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
   }
 }

@@ -8,7 +8,9 @@ Future<List<ArticleMeta>> _loadTestMeta() async {
   final file = File('test/resource/articles/meta.json');
   final raw = await file.readAsString();
   final list = jsonDecode(raw) as List;
-  return list.map((e) => ArticleMeta.fromMap(e as Map<String, dynamic>)).toList();
+  return list
+      .map((e) => ArticleMeta.fromMap(e as Map<String, dynamic>))
+      .toList();
 }
 
 void main() {
@@ -49,8 +51,9 @@ void main() {
 
   test('loadContent 读取文件', () async {
     final content = await ArticleService.loadAssetFile(
-        'test/resource/articles/d01_test.md',
-        rootBundleGetter: (path) => File(path).readAsString());
+      'test/resource/articles/d01_test.md',
+      rootBundleGetter: (path) => File(path).readAsString(),
+    );
     expect(content, contains('测试'));
   });
 }

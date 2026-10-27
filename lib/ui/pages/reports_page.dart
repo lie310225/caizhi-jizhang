@@ -414,11 +414,13 @@ class _CashFlowView extends StatelessWidget {
     final match = ArticleService.findByFlow(metaList, flow);
     if (!ctx.mounted) return;
     if (match == null) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('暂无该区块的入门文章')));
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(const SnackBar(content: Text('暂无该区块的入门文章')));
       return;
     }
-    Navigator.of(ctx).push(
-      MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
+    Navigator.of(
+      ctx,
+    ).push(MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
   }
 }

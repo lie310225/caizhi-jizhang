@@ -107,8 +107,11 @@ class FinanceProvider extends ChangeNotifier {
   }
 
   /// 按日期字符串前缀过滤 records
-  List<TransactionRecord> _filterByDate(List<TransactionRecord> records,
-      {String? monthPrefix, String? yearPrefix}) {
+  List<TransactionRecord> _filterByDate(
+    List<TransactionRecord> records, {
+    String? monthPrefix,
+    String? yearPrefix,
+  }) {
     return records.where((r) {
       if (yearPrefix != null && !r.date.startsWith(yearPrefix)) return false;
       if (monthPrefix != null && !r.date.startsWith(monthPrefix)) return false;
@@ -117,10 +120,12 @@ class FinanceProvider extends ChangeNotifier {
   }
 
   /// 导出 CSV zip 到临时文件，返回文件路径（分享用）
-  Future<String> exportCsvZip(
-      {String? monthPrefix, String? yearPrefix}) async {
-    final filtered =
-        _filterByDate(_records, monthPrefix: monthPrefix, yearPrefix: yearPrefix);
+  Future<String> exportCsvZip({String? monthPrefix, String? yearPrefix}) async {
+    final filtered = _filterByDate(
+      _records,
+      monthPrefix: monthPrefix,
+      yearPrefix: yearPrefix,
+    );
     final zipBytes = await csvZipData(filtered, _balanceItems);
     final dir = await Directory.systemTemp.createTemp('caizhi-');
     final file = File(p.join(dir.path, defaultZipFileName()));

@@ -21,13 +21,13 @@ class ArticleMeta {
   });
 
   factory ArticleMeta.fromMap(Map<String, dynamic> m) => ArticleMeta(
-        id: m['id'] as String,
-        title: m['title'] as String,
-        category: m['category'] as String,
-        relatedCategories: (m['relatedCategories'] as List<dynamic>).cast<String>(),
-        relatedFlows: (m['relatedFlows'] as List<dynamic>).cast<String>(),
-        summary: m['summary'] as String,
-        readMinutes: (m['readMinutes'] as num).toInt(),
-        file: m['file'] as String,
-      );
+    id: m['id'] as String,
+    title: m['title'] as String,
+    category: m['category'] as String,
+    relatedCategories: (m['relatedCategories'] as List<dynamic>).cast<String>(),
+    relatedFlows: (m['relatedFlows'] as List<dynamic>).cast<String>(),
+    summary: m['summary'] as String,
+    readMinutes: (m['readMinutes'] as num).toInt(),
+    file: m['file'] as String,
+  );
 }
