@@ -1,0 +1,14 @@
+[
+  {"id":"d01","title":"餐饮记账：一顿饭的真实成本","category":"daily","relatedCategories":["餐饮"],"relatedFlows":["operating"],"summary":"为什么记下每一笔餐饮开销，比想象中更重要？","readMinutes":3,"file":"daily/d01_eating.md"},
+  {"id":"d02","title":"交通 vs 通勤：怎么选才不亏","category":"daily","relatedCategories":["交通"],"relatedFlows":["operating"],"summary":"通勤方式背后的时间成本与金钱成本","readMinutes":3,"file":"daily/d02_transport.md"},
+  {"id":"d03","title":"工资 vs 奖金：个税为什么差这么多","category":"daily","relatedCategories":["工资"],"relatedFlows":["operating"],"summary":"同样是钱到手，工资和奖金的税率大不一样","readMinutes":4,"file":"daily/d03_salary.md"},
+  {"id":"d04","title":"居住成本：租房和买房的现金流真相","category":"daily","relatedCategories":["居住"],"relatedFlows":["operating"],"summary":"月租 vs 月供：表面数字背后的隐性成本","readMinutes":4,"file":"daily/d04_housing.md"},
+  {"id":"d05","title":"购物分类背后：冲动消费的数字陷阱","category":"daily","relatedCategories":["购物"],"relatedFlows":["operating"],"summary":"小额高频支出如何悄悄掏空钱包","readMinutes":3,"file":"daily/d05_shopping.md"},
+  {"id":"i01","title":"消费贷的年化利率陷阱","category":"investing","relatedCategories":["还贷还借款"],"relatedFlows":["investing"],"summary":"月息 1% 不是年化 12%，差远了","readMinutes":4,"file":"investing/i01_consumer_loan.md"},
+  {"id":"i02","title":"每月攒 1000 块，定投能让你变富吗","category":"investing","relatedCategories":["理财"],"relatedFlows":["investing"],"summary":"时间的复利为什么是普通人最好的朋友","readMinutes":5,"file":"investing/i02_dca.md"},
+  {"id":"i03","title":"存款 vs 货币基金：流动性怎么权衡","category":"investing","relatedCategories":["理财"],"relatedFlows":["investing"],"summary":"收益、灵活性、安全性，三者不能兼得","readMinutes":3,"file":"investing/i03_deposit_vs_mmf.md"},
+  {"id":"i04","title":"理财收益记账：为什么有人赚了钱却没感觉","category":"investing","relatedCategories":["理财收益"],"relatedFlows":["investing"],"summary":"投资收益该记在哪一栏才不会混淆","readMinutes":3,"file":"investing/i04_investment_income.md"},
+  {"id":"f01","title":"房贷的前 3 年为什么大多在还利息","category":"debt","relatedCategories":["还贷还借款"],"relatedFlows":["financing"],"summary":"等额本息 vs 等额本金：银行不会告诉你的事","readMinutes":4,"file":"debt/f01_mortgage.md"},
+  {"id":"f02","title":"什么时候该借、什么时候不该借","category":"debt","relatedCategories":["还贷还借款"],"relatedFlows":["financing"],"summary":"好债和坏债的分界线是什么","readMinutes":4,"file":"debt/f02_borrow_when.md"},
+  {"id":"f03","title":"债务重组：把高息债慢慢换成低息","category":"debt","relatedCategories":["还贷还借款"],"relatedFlows":["financing"],"summary":"当你有多笔高息负债时怎么突围","readMinutes":5,"file":"debt/f03_restructure.md"}
+]
