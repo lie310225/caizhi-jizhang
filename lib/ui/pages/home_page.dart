@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../config/categories.dart';
 import '../../models/transaction_record.dart';
 import '../../providers/finance_provider.dart';
 import '../../services/article_service.dart';
 import '../../services/format.dart';
+import '../app_tokens.dart';
+import '../widgets/empty_state.dart';
 import 'add_transaction_sheet.dart';
 import 'article_detail_page.dart';
 
@@ -78,20 +81,7 @@ class HomePage extends StatelessWidget {
           ),
           Expanded(
             child: records.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.receipt_long,
-                          size: 56,
-                          color: scheme.outline,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text('还没有记录，点右下角记下第一笔吧'),
-                      ],
-                    ),
-                  )
+                ? EmptyState.preset(EmptyStatePresets.txEmpty)
                 : ListView(children: tiles),
           ),
         ],
@@ -177,6 +167,16 @@ class _TransactionTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final provider = context.read<FinanceProvider>();
     final isIncome = record.type == TxType.income;
+    final leadingBg = isIncome
+        ? scheme.primaryContainer
+        : scheme.errorContainer;
+    final leadingFg = isIncome
+        ? scheme.onPrimaryContainer
+        : scheme.onErrorContainer;
+    final amountColor = isIncome
+        ? AppSemanticColors.income
+        : AppSemanticColors.expense;
+
     return Dismissible(
       key: ValueKey('tx-${record.id}'),
       direction: DismissDirection.endToStart,
@@ -190,24 +190,34 @@ class _TransactionTile extends StatelessWidget {
       ),
       child: ListTile(
         onLongPress: () => _longPressAssociation(context),
-        leading: CircleAvatar(
-          backgroundColor: scheme.primaryContainer,
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: leadingBg,
+            borderRadius: BorderRadius.circular(AppRadius.m),
+          ),
           child: Icon(
             kCategoryIcons[record.category] ?? Icons.receipt_long_outlined,
-            size: 20,
-            color: scheme.onPrimaryContainer,
+            size: 22,
+            color: leadingFg,
           ),
         ),
-        title: Text(record.category),
+        title: Text(
+          record.category,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
         subtitle: record.note.isEmpty
             ? null
-            : Text(record.note, maxLines: 1, overflow: TextOverflow.ellipsis),
+            : Text(
+                record.note,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: scheme.onSurfaceVariant),
+              ),
         trailing: Text(
           '${isIncome ? '+' : '-'}${fmtMoney(record.amount)}',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: isIncome ? scheme.primary : scheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
+          style: moneyStyleSmall(context, color: amountColor),
         ),
       ),
     );
@@ -234,6 +244,7 @@ class _TransactionTile extends StatelessWidget {
   }
 
   Future<void> _longPressAssociation(BuildContext ctx) async {
+    HapticFeedback.selectionClick();
     final metaList = await ArticleService.loadMeta();
     final match = ArticleService.findByCategory(metaList, record.category);
     if (!ctx.mounted) return;

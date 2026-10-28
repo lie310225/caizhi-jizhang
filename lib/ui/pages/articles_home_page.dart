@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/article_meta.dart';
 import '../../services/article_service.dart';
+import '../app_tokens.dart';
 import 'article_detail_page.dart';
 
 class ArticlesHomePage extends StatefulWidget {
@@ -105,22 +106,81 @@ class _CategoryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            ...articles.map(
-              (a) => ListTile(
-                dense: true,
-                title: Text(a.title),
-                subtitle: Text(
-                  '${a.summary} · 约 ${a.readMinutes} 分钟',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: a)),
+            ...articles.map((a) => _ArticleItem(meta: a)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 单篇文章条目：自绘（标题 + 摘要 + 阅读时长 badge）+ InkWell 微动效
+class _ArticleItem extends StatelessWidget {
+  final ArticleMeta meta;
+
+  const _ArticleItem({required this.meta});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.s),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: meta)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meta.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            meta.summary,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: scheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${meta.readMinutes} min',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: scheme.onSecondaryContainer),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              Icon(Icons.chevron_right, color: scheme.outline, size: 20),
+            ],
+          ),
         ),
       ),
     );

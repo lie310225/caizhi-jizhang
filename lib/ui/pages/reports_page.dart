@@ -5,6 +5,8 @@ import '../../providers/finance_provider.dart';
 import '../../services/article_service.dart';
 import '../../services/format.dart';
 import '../../services/statements.dart';
+import '../app_tokens.dart';
+import '../widgets/empty_state.dart';
 import 'article_detail_page.dart';
 
 /// 报表页：利润表 / 现金流量表 两个 Tab
@@ -255,17 +257,8 @@ class _StatementRow extends StatelessWidget {
 class _CashFlowView extends StatelessWidget {
   const _CashFlowView();
 
-  static const List<Color> palette = [
-    Color(0xFF2E7D32),
-    Color(0xFF66BB6A),
-    Color(0xFF26A69A),
-    Color(0xFFEF6C00),
-    Color(0xFF8E24AA),
-    Color(0xFF5C6BC0),
-    Color(0xFFC62828),
-    Color(0xFF00897B),
-    Color(0xFF6D4C41),
-  ];
+  /// 支出分类环形图调色板（业务语义色，跟随 app_tokens 统一定义）
+  static const List<Color> palette = AppSemanticColors.expensePalette;
 
   @override
   Widget build(BuildContext context) {
@@ -346,11 +339,9 @@ class _CashFlowView extends StatelessWidget {
                 Text('支出分类占比', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 16),
                 if (total <= 0)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('本月暂无支出记录'),
-                    ),
+                  EmptyState.preset(
+                    EmptyStatePresets.noExpenseData,
+                    variant: EmptyStateVariant.compact,
                   )
                 else ...[
                   SizedBox(
@@ -367,9 +358,9 @@ class _CashFlowView extends StatelessWidget {
                                   '${(byCategory.values.elementAt(i) / total * 100).toStringAsFixed(0)}%',
                               radius: 60,
                               color: palette[i % palette.length],
-                              titleStyle: const TextStyle(
+                              titleStyle: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white,
+                                color: scheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

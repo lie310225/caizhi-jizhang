@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/balance_item.dart';
 import '../../providers/finance_provider.dart';
 import '../../services/format.dart';
+import '../widgets/empty_state.dart';
 
 /// 资产负债页：净资产卡 + 资产/负债条目管理
 class BalancePage extends StatelessWidget {
@@ -56,13 +57,29 @@ class BalancePage extends StatelessWidget {
             title: '资产（${assets.length}）',
             onAdd: () => _showAddDialog(context, 'asset'),
           ),
-          if (assets.isEmpty) const _EmptyHint(text: '暂无资产条目，点右上角 + 添加'),
+          if (assets.isEmpty)
+            const EmptyState(
+              variant: EmptyStateVariant.compact,
+              config: EmptyStateConfig(
+                icon: Icons.account_balance_outlined,
+                title: '还没有资产条目',
+                subtitle: '点右侧 + 开始记录',
+              ),
+            ),
           for (final item in assets) _BalanceTile(item: item),
           _SectionHeader(
             title: '负债（${liabilities.length}）',
             onAdd: () => _showAddDialog(context, 'liability'),
           ),
-          if (liabilities.isEmpty) const _EmptyHint(text: '暂无负债条目，点右上角 + 添加'),
+          if (liabilities.isEmpty)
+            const EmptyState(
+              variant: EmptyStateVariant.compact,
+              config: EmptyStateConfig(
+                icon: Icons.credit_card_off_outlined,
+                title: '还没有负债条目',
+                subtitle: '点右侧 + 开始记录',
+              ),
+            ),
           for (final item in liabilities) _BalanceTile(item: item),
         ],
       ),
@@ -155,22 +172,6 @@ class _SectionHeader extends StatelessWidget {
       ),
     );
   }
-}
-
-class _EmptyHint extends StatelessWidget {
-  final String text;
-  const _EmptyHint({required this.text});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12),
-    child: Text(
-      text,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.outline,
-      ),
-    ),
-  );
 }
 
 class _BalanceTile extends StatelessWidget {
