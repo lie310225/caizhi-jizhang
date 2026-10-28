@@ -11,31 +11,37 @@ ThemeData buildTheme() {
   return ThemeData(
     useMaterial3: true,
     colorScheme: light,
-    scaffoldBackgroundColor: light.surface,
+    // 背景带一点绿灰，白卡片才能浮起来
+    scaffoldBackgroundColor: const Color(0xFFF5F8F3),
     // ------------------------------------------------------------------
     // AppBar：M3 标准样式
     // ------------------------------------------------------------------
     appBarTheme: AppBarTheme(
-      centerTitle: true,
-      backgroundColor: light.surface,
+      centerTitle: false,
+      backgroundColor: const Color(0xFFF5F8F3),
       foregroundColor: light.onSurface,
       elevation: 0,
-      scrolledUnderElevation: 0.5,
+      scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: TextStyle(
         color: light.onSurface,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
       ),
     ),
     // ------------------------------------------------------------------
-    // Card：圆角 12、elevation 1
+    // Card：白底、圆角 20、细边框（靠边框而非阴影区分层次）
     // ------------------------------------------------------------------
     cardTheme: CardThemeData(
-      color: light.surfaceContainerLow,
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      color: Colors.white,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: light.outlineVariant.withValues(alpha: 0.55)),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     ),
     // ------------------------------------------------------------------
     // 底部导航：M3 指示器 + 选中态
