@@ -3,9 +3,10 @@ import 'package:sqflite/sqflite.dart';
 import '../models/transaction_record.dart';
 import '../models/balance_item.dart';
 import '../models/budget.dart';
+import '../models/recurring_bill.dart';
 
-/// 当前数据库版本：v2 新增 budgets 表
-const int kDatabaseVersion = 2;
+/// 当前数据库版本：v2 budgets、v3 recurrings
+const int kDatabaseVersion = 3;
 
 const String _createBudgetsSql = '''
   CREATE TABLE budgets(
@@ -14,6 +15,19 @@ const String _createBudgetsSql = '''
     category TEXT NOT NULL,
     amount REAL NOT NULL,
     UNIQUE(month, category)
+  )
+''';
+
+const String _createRecurringsSql = '''
+  CREATE TABLE recurrings(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    type TEXT NOT NULL,
+    amount REAL NOT NULL,
+    day_of_month INTEGER NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    last_applied_month TEXT
   )
 ''';
 
@@ -49,9 +63,11 @@ Future<Database> openCaizhiDatabase(DatabaseFactory factory, String path) =>
             )
           ''');
           await db.execute(_createBudgetsSql);
+          await db.execute(_createRecurringsSql);
         },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) await db.execute(_createBudgetsSql);
+          if (oldVersion < 3) await db.execute(_createRecurringsSql);
         },
       ),
     );
@@ -130,5 +146,31 @@ class DatabaseHelper {
       where: 'month = ? AND category = ?',
       whereArgs: [month, category],
     );
+  }
+
+  Future<int> insertRecurring(RecurringBill bill) async {
+    final db = await _database;
+    return db.insert('recurrings', bill.toMap());
+  }
+
+  Future<List<RecurringBill>> allRecurrings() async {
+    final db = await _database;
+    final rows = await db.query('recurrings', orderBy: 'day_of_month ASC');
+    return rows.map(RecurringBill.fromMap).toList();
+  }
+
+  Future<int> updateRecurring(RecurringBill bill) async {
+    final db = await _database;
+    return db.update(
+      'recurrings',
+      bill.toMap(),
+      where: 'id = ?',
+      whereArgs: [bill.id],
+    );
+  }
+
+  Future<int> deleteRecurring(int id) async {
+    final db = await _database;
+    return db.delete('recurrings', where: 'id = ?', whereArgs: [id]);
   }
 }

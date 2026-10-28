@@ -6,8 +6,10 @@ import '../db/database_helper.dart';
 import '../models/transaction_record.dart';
 import '../models/balance_item.dart';
 import '../models/budget.dart';
+import '../models/recurring_bill.dart';
 import '../services/budgeting.dart';
 import '../services/csv_export.dart';
+import '../services/recurring.dart';
 import '../services/statements.dart';
 
 /// 全局财务状态：加载、增删、按月筛选、派生报表数据
@@ -17,6 +19,7 @@ class FinanceProvider extends ChangeNotifier {
   List<TransactionRecord> _records = [];
   List<BalanceItem> _balanceItems = [];
   List<Budget> _budgets = [];
+  List<RecurringBill> _recurringBills = [];
   String _selectedMonth = _currentMonth();
   bool _loading = false;
 
@@ -28,6 +31,7 @@ class FinanceProvider extends ChangeNotifier {
   List<TransactionRecord> get records => List.unmodifiable(_records);
   List<BalanceItem> get balanceItems => List.unmodifiable(_balanceItems);
   List<Budget> get budgets => List.unmodifiable(_budgets);
+  List<RecurringBill> get recurringBills => List.unmodifiable(_recurringBills);
   String get selectedMonth => _selectedMonth;
   bool get loading => _loading;
 
@@ -92,6 +96,7 @@ class FinanceProvider extends ChangeNotifier {
     _records = await _db.allTransactions();
     _balanceItems = await _db.allBalanceItems();
     _budgets = await _db.allBudgets();
+    _recurringBills = await _db.allRecurrings();
     _loading = false;
     notifyListeners();
   }
@@ -120,6 +125,66 @@ class FinanceProvider extends ChangeNotifier {
   Future<void> deleteTransaction(int id) async {
     await _db.deleteTransaction(id);
     _records = await _db.allTransactions();
+    notifyListeners();
+  }
+
+  // ---------------- 周期账单 ----------------
+
+  /// 当月到期且尚未记账的周期账单
+  List<RecurringBill> get monthDueRecurrings => dueRecurrings(
+    _recurringBills,
+    month: _selectedMonth,
+    today: todayString(),
+  );
+
+  Future<void> addRecurring({
+    required String title,
+    required String category,
+    required TxType type,
+    required double amount,
+    required int dayOfMonth,
+  }) async {
+    await _db.insertRecurring(
+      RecurringBill(
+        title: title,
+        category: category,
+        type: type,
+        amount: amount,
+        dayOfMonth: dayOfMonth,
+      ),
+    );
+    _recurringBills = await _db.allRecurrings();
+    notifyListeners();
+  }
+
+  Future<void> toggleRecurring(RecurringBill bill, bool active) async {
+    await _db.updateRecurring(bill.copyWith(active: active));
+    _recurringBills = await _db.allRecurrings();
+    notifyListeners();
+  }
+
+  Future<void> deleteRecurring(int id) async {
+    await _db.deleteRecurring(id);
+    _recurringBills = await _db.allRecurrings();
+    notifyListeners();
+  }
+
+  /// 把某笔周期账单记入当月流水，并标记本月已记
+  Future<void> applyRecurring(RecurringBill bill) async {
+    await _db.insertTransaction(
+      TransactionRecord(
+        type: bill.type,
+        category: bill.category,
+        amount: bill.amount,
+        flow: flowFor(bill.category, bill.type),
+        date: recurringDate(bill, _selectedMonth),
+        note: bill.title,
+        createdAt: DateTime.now().toIso8601String(),
+      ),
+    );
+    await _db.updateRecurring(bill.copyWith(lastAppliedMonth: _selectedMonth));
+    _records = await _db.allTransactions();
+    _recurringBills = await _db.allRecurrings();
     notifyListeners();
   }
 

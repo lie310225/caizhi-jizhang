@@ -8,6 +8,7 @@ import '../widgets/empty_state.dart';
 import '../widgets/transaction_tile.dart';
 import 'add_transaction_sheet.dart';
 import 'budget_page.dart';
+import 'recurring_page.dart';
 import 'transaction_search_page.dart';
 
 /// 流水首页：渐变主卡（月份 + 结余 + 收支 + 预算进度）+ 按日分组流水 + 记一笔
@@ -21,6 +22,10 @@ class HomePage extends StatelessWidget {
     final records = provider.monthRecords;
 
     final children = <Widget>[const _HeroCard()];
+
+    if (provider.monthDueRecurrings.isNotEmpty) {
+      children.add(_RecurringHint(count: provider.monthDueRecurrings.length));
+    }
 
     if (records.isEmpty) {
       children.add(
@@ -400,6 +405,63 @@ class _HeroStat extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ------------------------------------------------------------------
+// 到期账单提示：首页轻量横幅，点进去一键记账
+// ------------------------------------------------------------------
+class _RecurringHint extends StatelessWidget {
+  final int count;
+
+  const _RecurringHint({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      child: Material(
+        color: AppSemanticColors.income.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(AppRadius.l),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.l),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const RecurringPage())),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 11, 12, 11),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.event_repeat_outlined,
+                  size: 18,
+                  color: AppSemanticColors.income,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '本月有 $count 笔周期账单待记账',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppSemanticColors.income,
+                    ),
+                  ),
+                ),
+                Text(
+                  '去记账 ›',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
