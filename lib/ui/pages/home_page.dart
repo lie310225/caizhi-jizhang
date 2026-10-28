@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../config/categories.dart';
-import '../../models/transaction_record.dart';
 import '../../providers/finance_provider.dart';
-import '../../services/article_service.dart';
+import '../../services/budgeting.dart';
 import '../../services/format.dart';
 import '../app_tokens.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/transaction_tile.dart';
 import 'add_transaction_sheet.dart';
-import 'article_detail_page.dart';
+import 'budget_page.dart';
+import 'transaction_search_page.dart';
 
-/// 流水首页：渐变主卡（月份 + 结余 + 收支）+ 按日分组流水 + 记一笔
+/// 流水首页：渐变主卡（月份 + 结余 + 收支 + 预算进度）+ 按日分组流水 + 记一笔
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -51,12 +50,23 @@ class HomePage extends StatelessWidget {
             ),
           );
         }
-        children.add(_TransactionTile(record: r));
+        children.add(TransactionTile(record: r));
       }
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('财智记账')),
+      appBar: AppBar(
+        title: const Text('财智记账'),
+        actions: [
+          IconButton(
+            tooltip: '搜索流水',
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const TransactionSearchPage()),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showAddTransactionSheet(context),
         elevation: 6,
@@ -74,7 +84,7 @@ class HomePage extends StatelessWidget {
 }
 
 // ------------------------------------------------------------------
-// 渐变主卡：视觉焦点，大数字 + 收支对照
+// 渐变主卡：视觉焦点，大数字 + 收支对照 + 预算进度
 // ------------------------------------------------------------------
 class _HeroCard extends StatelessWidget {
   const _HeroCard();
@@ -83,6 +93,7 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<FinanceProvider>();
     final summary = provider.monthSummary;
+    final budget = provider.monthBudgetStatus;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -208,11 +219,111 @@ class _HeroCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (budget != null) ...[
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: _BudgetMeter(status: budget),
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// 主卡内的预算进度条：未超支为白色，超支转为琥珀色
+class _BudgetMeter extends StatelessWidget {
+  final BudgetStatus status;
+
+  const _BudgetMeter({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (status.ratio * 100).round();
+    final exceeded = status.exceeded;
+    final fill = exceeded
+        ? const Color(0xFFFFB74D)
+        : Colors.white.withValues(alpha: 0.88);
+    final hint = exceeded
+        ? '已超支 $percent% · 超出 ${fmtMoney(-status.remaining)}'
+        : '剩余 ${fmtMoney(status.remaining)}';
+
+    return InkResponse(
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const BudgetPage())),
+      radius: 120,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '本月预算',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                fmtMoney(status.limit),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const Spacer(),
+              Text(
+                exceeded ? '已超支 $percent%' : '已用 $percent%',
+                style: TextStyle(
+                  color: exceeded ? fill : Colors.white.withValues(alpha: 0.8),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: status.fillRatio,
+              minHeight: 5,
+              backgroundColor: Colors.white.withValues(alpha: 0.16),
+              valueColor: AlwaysStoppedAnimation<Color>(fill),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                hint,
+                style: TextStyle(
+                  color: exceeded ? fill : Colors.white.withValues(alpha: 0.62),
+                  fontSize: 11,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '管理 ›',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -322,151 +433,5 @@ class _SectionTitle extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _TransactionTile extends StatelessWidget {
-  final TransactionRecord record;
-
-  const _TransactionTile({required this.record});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final provider = context.read<FinanceProvider>();
-    final isIncome = record.type == TxType.income;
-    final categoryColor = AppCategoryColors.of(record.category);
-    final amountColor = isIncome
-        ? AppSemanticColors.income
-        : AppSemanticColors.expense;
-
-    final card = Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.l),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.l),
-          onLongPress: () => _longPressAssociation(context),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppCategoryColors.tintOf(record.category),
-                    borderRadius: BorderRadius.circular(AppRadius.m),
-                  ),
-                  child: Icon(
-                    kCategoryIcons[record.category] ??
-                        Icons.receipt_long_outlined,
-                    size: 21,
-                    color: categoryColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        record.category,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          height: 1.2,
-                        ),
-                      ),
-                      if (record.note.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          record.note,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '${isIncome ? '+' : '-'}${fmtMoney(record.amount)}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: amountColor,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return Dismissible(
-      key: ValueKey('tx-${record.id}'),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) => provider.deleteTransaction(record.id!),
-      background: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
-        decoration: BoxDecoration(
-          color: scheme.errorContainer,
-          borderRadius: BorderRadius.circular(AppRadius.l),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
-      ),
-      child: card,
-    );
-  }
-
-  Future<bool?> _confirmDelete(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('删除记录'),
-        content: const Text('确定删除这笔记录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _longPressAssociation(BuildContext ctx) async {
-    HapticFeedback.selectionClick();
-    final metaList = await ArticleService.loadMeta();
-    final match = ArticleService.findByCategory(metaList, record.category);
-    if (!ctx.mounted) return;
-    if (match == null) {
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(SnackBar(content: Text('「${record.category}」暂无关联知识')));
-      return;
-    }
-    Navigator.of(
-      ctx,
-    ).push(MaterialPageRoute(builder: (_) => ArticleDetailPage(meta: match)));
   }
 }

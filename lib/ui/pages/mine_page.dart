@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'articles_home_page.dart';
+import 'budget_page.dart';
 import 'export_page.dart';
 
-/// 我的：v2 两个真实入口
+/// 我的：知识课堂 / 预算管理 / 导出数据
 class MinePage extends StatelessWidget {
   const MinePage({super.key});
 
@@ -12,6 +13,15 @@ class MinePage extends StatelessWidget {
       appBar: AppBar(title: const Text('我的')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.savings_outlined),
+            title: const Text('预算管理'),
+            subtitle: const Text('本月总预算与分类预算'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const BudgetPage())),
+          ),
           ListTile(
             leading: const Icon(Icons.school_outlined),
             title: const Text('财务知识课堂'),

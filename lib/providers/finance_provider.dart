@@ -5,6 +5,8 @@ import '../config/categories.dart';
 import '../db/database_helper.dart';
 import '../models/transaction_record.dart';
 import '../models/balance_item.dart';
+import '../models/budget.dart';
+import '../services/budgeting.dart';
 import '../services/csv_export.dart';
 import '../services/statements.dart';
 
@@ -14,6 +16,7 @@ class FinanceProvider extends ChangeNotifier {
 
   List<TransactionRecord> _records = [];
   List<BalanceItem> _balanceItems = [];
+  List<Budget> _budgets = [];
   String _selectedMonth = _currentMonth();
   bool _loading = false;
 
@@ -24,6 +27,7 @@ class FinanceProvider extends ChangeNotifier {
 
   List<TransactionRecord> get records => List.unmodifiable(_records);
   List<BalanceItem> get balanceItems => List.unmodifiable(_balanceItems);
+  List<Budget> get budgets => List.unmodifiable(_budgets);
   String get selectedMonth => _selectedMonth;
   bool get loading => _loading;
 
@@ -40,6 +44,41 @@ class FinanceProvider extends ChangeNotifier {
   List<PeriodSummary> get trend => recentMonthTrend(_records, _selectedMonth);
   NetWorthTotals get totals => netWorthTotals(_balanceItems);
 
+  /// 当月总预算执行情况（未设总预算为 null）
+  BudgetStatus? get monthBudgetStatus => totalBudgetStatus(
+    budgets: _budgets,
+    records: _records,
+    month: _selectedMonth,
+  );
+
+  /// 当月各分类预算执行情况
+  List<CategoryBudgetStatus> get monthCategoryBudgetStatuses =>
+      categoryBudgetStatuses(
+        budgets: _budgets,
+        records: _records,
+        month: _selectedMonth,
+      );
+
+  /// 某分类当月预算额度；未设置返回 null
+  double? budgetLimitOf(String category) =>
+      budgetLimitFor(_budgets, _selectedMonth, category);
+
+  /// 写入当月预算（amount <= 0 视为清除该条预算）
+  Future<void> setBudget({
+    String category = Budget.totalCategory,
+    required double amount,
+  }) async {
+    if (amount <= 0) {
+      await _db.deleteBudget(_selectedMonth, category);
+    } else {
+      await _db.upsertBudget(
+        Budget(month: _selectedMonth, category: category, amount: amount),
+      );
+    }
+    _budgets = await _db.allBudgets();
+    notifyListeners();
+  }
+
   void setMonth(String month) {
     _selectedMonth = month;
     notifyListeners();
@@ -52,6 +91,7 @@ class FinanceProvider extends ChangeNotifier {
     notifyListeners();
     _records = await _db.allTransactions();
     _balanceItems = await _db.allBalanceItems();
+    _budgets = await _db.allBudgets();
     _loading = false;
     notifyListeners();
   }
